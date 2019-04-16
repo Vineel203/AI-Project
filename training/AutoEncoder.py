@@ -3,9 +3,6 @@ from keras.models import Model , load_model
 from keras.utils import plot_model
 from keras.datasets import mnist
 import numpy as np
-import preprocess
-
-
 
 class AutoEncoder(object):
     def __init__(self,inputSize,hiddenNumber):
@@ -40,20 +37,37 @@ class AutoEncoder(object):
         self.autoencoder.save("../Model/"+name+".h5")
 
 class StackedAutoEncoder(object):
-    def __init__(self,inputSize,hiddenNumber,stackPercentages):
+    def __init__(self,inputSize = 784,hiddenNumber = 2000,stackPercentages=["50","37","25","12","0"]):
+        self.stackPercentages = stackPercentages
         self.aeL = [AutoEncoder(inputSize,hiddenNumber) for i in stackPercentages]
-        input_img = Input(shape=(inputSize,))
-        output = self.aeL[0].autoencoder(input_img)
-        for i in range(1,len(self.aeL)):
-            output = self.aeL[i].autoencoder(output)
 
-        self.sae = Model(input_img,output)
-        self.sae.compile(optimizer='adadelta', loss='binary_crossentropy')
-        plot_model(self.sae, to_file='model.png')
+    def trainAutoEncoderl(self,no,epochs=10):
+        x_train = []
+        y_train = []
+        x_file = "error"+self.stackPercentages[no]+"l.txt"
+        y_file = "error"+self.stackPercentages[no+1]+"l.txt"
+        print("opening "+x_file)
+        with open(x_file,"r") as f:
+            for l in f:
+                x_train+=[[float(p) for p in l.strip().split()]]
 
-    def train(self,x_train,y_train,epochs,percentagesList):
-    	
-        
+        with open(y_file,"r") as f:
+            for l in f:
+                y_train+=[[float(p) for p in l.strip().split()]]
+
+        tempCount = no+1
+        while(tempCount<len(self.stackPercentages)):
+            x_file = "error"+self.stackPercentages[tempCount]+"l.txt"
+            print(x_file)
+            with open(x_file,"r") as f:
+                for l in f:
+                    x_train+=[[float(p) for p in l.strip().split()]]
+                    y_train+=[[float(p) for p in l.strip().split()]]
+            tempCount+=1
+
+
+        self.aeL[no].train(x_train,y_train,epochs)
+        self.aeL[no].save("AutoEncoder"+str(no))        
 
     def predict(self,x_test):
         return self.sae.predict(x_test)
@@ -64,36 +78,5 @@ class StackedAutoEncoder(object):
     def load(self,name):
         self.sae.load("../Model/"+name+".h5")
 
-
-from keras.datasets import mnist
-import numpy as np
-
-(x_train, _), (x_test, _) = mnist.load_data()
-x_train = x_train.astype('float32') / 255.
-x_test = x_test.astype('float32') / 255.
-x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
-x_test = x_test.reshape((len(x_test), np.prod(x_test.shape[1:])))
-
-ae = AutoEncoder(784,4000)
-ae.train(x_train,x_train,10)
-
-encoded_imgs = ae.predict(x_test)
-
-import matplotlib.pyplot as plt
-n = 10  # how many digits we will display
-plt.figure(figsize=(20, 4))
-for i in range(n):
-    # display original
-    ax = plt.subplot(2, n, i + 1)
-    plt.imshow(x_test[i].reshape(28, 28))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-
-    # display reconstruction
-    ax = plt.subplot(2, n, i + 1 + n)
-    plt.imshow(encoded_imgs[i].reshape(28, 28))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-plt.show()
+sa = StackedAutoEncoder()
+sa.trainAutoEncoderl(3)
