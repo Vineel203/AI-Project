@@ -5,7 +5,7 @@ from keras.datasets import mnist
 import numpy as np
 
 class AutoEncoder(object):
-    def __init__(self,inputSize,hiddenNumber):
+    def __init__(self,inputSize=784,hiddenNumber=2000):
         self.encoding_dim = hiddenNumber
         self.input_img = Input(shape=(inputSize,))
         self.encoded = Dense(self.encoding_dim,activation = 'relu')(self.input_img)
@@ -26,8 +26,8 @@ class AutoEncoder(object):
         self.autoencoder.fit(x_train, y_train,
                         epochs=epochs,
                         batch_size=256,
-                        shuffle=True,
-                        validation_split=0.1)
+                        shuffle=True
+                        )
         
 
     def predict(self,x_test):
@@ -35,6 +35,9 @@ class AutoEncoder(object):
 
     def save(self,name):
         self.autoencoder.save("../Model/"+name+".h5")
+
+    def load(self,name):
+        self.autoencoder.load_weights("../Model/"+name+".h5")
 
 class StackedAutoEncoder(object):
     def __init__(self,inputSize = 784,hiddenNumber = 2000,stackPercentages=["50","37","25","12","0"]):
@@ -65,8 +68,8 @@ class StackedAutoEncoder(object):
                     y_train+=[[float(p) for p in l.strip().split()]]
             tempCount+=1
 
-
-        self.aeL[no].train(x_train,y_train,epochs)
+        print("training started!")
+        self.aeL[no].train(np.array(x_train),np.array(y_train),epochs)
         self.aeL[no].save("AutoEncoder"+str(no))        
 
     def predict(self,x_test):
@@ -78,5 +81,6 @@ class StackedAutoEncoder(object):
     def load(self,name):
         self.sae.load("../Model/"+name+".h5")
 
-sa = StackedAutoEncoder()
-sa.trainAutoEncoderl(3)
+if __name__ == "__main__":
+    sa = StackedAutoEncoder()
+    sa.trainAutoEncoderl(1)
