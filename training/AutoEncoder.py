@@ -27,7 +27,7 @@ class AutoEncoder(object):
                         epochs=epochs,
                         batch_size=256,
                         shuffle=True,
-                        validation_data=(x_test, x_test))
+                        validation_split=0.1)
         
 
     def predict(self,x_test):
