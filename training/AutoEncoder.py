@@ -83,4 +83,7 @@ class StackedAutoEncoder(object):
 
 if __name__ == "__main__":
     sa = StackedAutoEncoder()
-    sa.trainAutoEncoderl(1)
+    sa.trainAutoEncoderl(0,10)
+    sa.trainAutoEncoderl(1,10)
+    sa.trainAutoEncoderl(2,10)
+    sa.trainAutoEncoderl(3,10)
