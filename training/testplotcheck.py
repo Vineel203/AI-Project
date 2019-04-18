@@ -1,16 +1,18 @@
-from AutoEncoder import AutoEncoder
+from AutoEncoder import AutoEncoder , StackedAutoEncoder
 from plotCheck import plot
 import numpy	
 #load model here
-ae = AutoEncoder()
-ae.load("AutoEncoder0")
+sae = StackedAutoEncoder()
+sae.createStackAutoEncoder()
+sae.load("StackAutoEncoder")
 
 
 
-with open("errort50l.txt","r") as f:
+with open("error50l.txt","r") as f:
     for i in f:
         l = [float(p) for p in i.strip().split()]
         n = numpy.array([l])
         plot(n)
-        plot(ae.predict(n))
+        plot(sae.predict(n))
+        
         

@@ -41,6 +41,7 @@ class AutoEncoder(object):
 
 class StackedAutoEncoder(object):
     def __init__(self,inputSize = 784,hiddenNumber = 2000,stackPercentages=["50","37","25","12","0"]):
+        self.inputSize = inputSize
         self.stackPercentages = stackPercentages
         self.aeL = [AutoEncoder(inputSize,hiddenNumber) for i in stackPercentages]
 
@@ -79,11 +80,23 @@ class StackedAutoEncoder(object):
         self.sae.save("../Model/"+name+".h5")
 
     def load(self,name):
-        self.sae.load("../Model/"+name+".h5")
+        self.sae.load_weights("../Model/"+name+".h5")
+
+    def createStackAutoEncoder(self):
+        input_img = Input(shape=(self.inputSize,))
+        output = self.aeL[0].autoencoder(input_img)
+        output1 = self.aeL[1].autoencoder(output)
+        output2 = self.aeL[2].autoencoder(output1)
+        output3 = self.aeL[3].autoencoder(output2)
+
+        self.sae = Model(input_img,output3)
+        self.sae.compile(optimizer='adadelta', loss='binary_crossentropy')
 
 if __name__ == "__main__":
     sa = StackedAutoEncoder()
-    sa.trainAutoEncoderl(0,10)
-    sa.trainAutoEncoderl(1,10)
-    sa.trainAutoEncoderl(2,10)
-    sa.trainAutoEncoderl(3,10)
+    sa.trainAutoEncoderl(0,20)
+    sa.trainAutoEncoderl(1,20)
+    sa.trainAutoEncoderl(2,20)
+    sa.trainAutoEncoderl(3,20)
+    sa.createStackAutoEncoder()
+    sa.save("StackAutoEncoder")
