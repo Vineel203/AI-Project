@@ -46,27 +46,70 @@ class StackedAutoEncoder(object):
         self.aeL = [AutoEncoder(inputSize,hiddenNumber) for i in stackPercentages]
 
     def trainAutoEncoderl(self,no,epochs=10):
+        (xtrain, _), (_, _) = mnist.load_data()
+        xtrain = xtrain.astype('float32') / 255.
+        perList = [14,11,7,3,0]
+
         x_train = []
         y_train = []
         x_file = "error"+self.stackPercentages[no]+"l.txt"
         y_file = "error"+self.stackPercentages[no+1]+"l.txt"
         print("opening "+x_file)
-        with open(x_file,"r") as f:
-            for l in f:
-                x_train+=[[float(p) for p in l.strip().split()]]
+        #loading no
+        perr = perList[no]
+        temp = []
 
-        with open(y_file,"r") as f:
-            for l in f:
-                y_train+=[[float(p) for p in l.strip().split()]]
+        line = 0
+        for matrix in xtrain:
+            line+=1
+            print(line)
+            temp = []
+            for row in range(28):
+                for colomn in range(28):
+                    if(colomn<perr):
+                        temp.append(float(0))
+                    else:
+                        temp.append(matrix[row][colomn])
+            x_train.append(temp)
+            if(line>100000):
+                break
+        # loading no+1
+        perr = perList[no+1]
+        line = 0
+        for matrix in xtrain:
+            line+=1
+            print(line)
+            temp = []
+            for row in range(28):
+                for colomn in range(28):
+                    if(colomn<perr):
+                        temp.append(float(0))
+                    else:
+                        temp.append(matrix[row][colomn])
+            y_train.append(temp)
+            if(line>100000):
+                break
 
+        #loading sames
         tempCount = no+1
         while(tempCount<len(self.stackPercentages)):
             x_file = "error"+self.stackPercentages[tempCount]+"l.txt"
-            print(x_file)
-            with open(x_file,"r") as f:
-                for l in f:
-                    x_train+=[[float(p) for p in l.strip().split()]]
-                    y_train+=[[float(p) for p in l.strip().split()]]
+            perr = perList[tempCount]
+            line = 0
+            for matrix in xtrain:
+                line+=1
+                print(line)
+                temp = []
+                for row in range(28):
+                    for colomn in range(28):
+                        if(colomn<perr):
+                            temp.append(float(0))
+                        else:
+                            temp.append(matrix[row][colomn])
+                x_train.append(temp)
+                y_train.append(temp)
+                if(line>100000):
+                    break
             tempCount+=1
 
         print("training started!")
