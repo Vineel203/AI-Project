@@ -4,7 +4,7 @@ import numpy
 #load model here
 sae = StackedAutoEncoder()
 sae.createStackAutoEncoder()
-sae.load("StackAutoEncoder")
+sae.load("StackedAutoEncoder")
 
 
 
