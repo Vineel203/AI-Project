@@ -21,7 +21,7 @@ class AutoEncoder(object):
         encoded_input = Input(shape=(self.encoding_dim,))
         self.decoder_layer = self.autoencoder.layers[-1]
         self.decoder = Model(encoded_input, self.decoder_layer(encoded_input))
-        self.autoencoder.compile(optimizer='sgd', loss='mean_squared_error' , metrics=['mae', 'acc'])
+        self.autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy', metrics=['mae', 'acc'])
 
 
     def train(self,x_train,y_train,epochs):
@@ -62,10 +62,10 @@ class StackedAutoEncoder(object):
         temp = []
 
         line = 0
-        #for matrix in xtrain:
-        while(True):
-            ri = random.randint(0,59999)
-            matrix = xtrain[ri]
+        #while(True):
+        for matrix in xtrain:
+            #ri = random.randint(0,59999)
+            #matrix = xtrain[ri]
             line+=1
             print(line)
             temp = []
@@ -76,15 +76,15 @@ class StackedAutoEncoder(object):
                     else:
                         temp.append(matrix[row][colomn])
             x_train.append(temp)
-            if(line>2000):
+            if(line>20000):
                 break
         # loading no+1
         perr = perList[no+1]
         line = 0
-        #for matrix in xtrain:
-        while(True):
-            ri = random.randint(0,59999)
-            matrix = xtrain[ri]
+        #while(True):
+        for matrix in xtrain:
+            #ri = random.randint(0,59999)
+            #matrix = xtrain[ri]
             line+=1
             print(line)
             temp = []
@@ -95,7 +95,7 @@ class StackedAutoEncoder(object):
                     else:
                         temp.append(matrix[row][colomn])
             y_train.append(temp)
-            if(line>2000):
+            if(line>20000):
                 break
 
         #loading sames
@@ -104,10 +104,10 @@ class StackedAutoEncoder(object):
             x_file = "error"+self.stackPercentages[tempCount]+"l.txt"
             perr = perList[tempCount]
             line = 0
-            #for matrix in xtrain:
-            while(True):
-                ri = random.randint(0,59999)
-                matrix = xtrain[ri]
+            #while(True):
+            for matrix in xtrain:
+                #ri = random.randint(0,59999)
+                #matrix = xtrain[ri]
                 line+=1
                 print(line)
                 temp = []
@@ -119,7 +119,7 @@ class StackedAutoEncoder(object):
                             temp.append(matrix[row][colomn])
                 x_train.append(temp)
                 y_train.append(temp)
-                if(line>2000):
+                if(line>20000):
                     break
             tempCount+=1
 
@@ -165,8 +165,8 @@ class StackedAutoEncoder(object):
                             temp.append(matrix[row][colomn])
                 x_train.append(temp)
                 y_train.append(temp1)
-                if(line>5000):
-                    break
+                if(line>20000):
+                    break																																																																																																														
         print("training Started ..! ")
         self.sae.fit(np.array(x_train), np.array(y_train),
                         epochs=epochs,
@@ -198,10 +198,10 @@ class StackedAutoEncoder(object):
                             temp.append(matrix[row][colomn])
                 x_train.append(temp)
                 y_train.append(temp1)
-                if(line>5000):
+                if(line>10000):
                     break
         print("evaluate Started ..! ")
-        return self.sae.evaluate(x_train, y_train)
+        return self.sae.evaluate(np.array(x_train), np.array(y_train))
 
 
     def createStackAutoEncoder(self):
@@ -212,15 +212,19 @@ class StackedAutoEncoder(object):
         output3 = self.aeL[3].autoencoder(output2)
 
         self.sae = Model(input_img,output3)
-        self.sae.compile(optimizer='sgd', loss='mean_squared_error' , metrics=['mae', 'acc'])
+        self.sae.compile(optimizer='adadelta', loss='binary_crossentropy', metrics=['accuracy'])
 
 if __name__ == "__main__":
-    sa = StackedAutoEncoder()
-    sa.trainAutoEncoderl(0,30)
-    sa.trainAutoEncoderl(1,30)
-    sa.trainAutoEncoderl(2,30)
-    sa.trainAutoEncoderl(3,30)
+    sa = StackedAutoEncoder(hiddenNumber = 200)
+    #sa.trainAutoEncoderl(0,30)
+    #sa.trainAutoEncoderl(1,30)
+    #sa.trainAutoEncoderl(2,30)
+    #sa.trainAutoEncoderl(3,30)
+    #sa.aeL[0].load("AutoEncoder0")
+    #sa.aeL[1].load("AutoEncoder1")
+    #sa.aeL[2].load("AutoEncoder2")
+    #sa.aeL[3].load("AutoEncoder3")
     sa.createStackAutoEncoder()
-    sa.train(30)
-    sa.save("StackedAutoEncoder")
-    
+    sa.load("StackedAutoEncoder")
+    #sa.save("StackedAutoEncoder")
+    print(sa.evaluate())

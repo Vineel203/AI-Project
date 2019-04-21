@@ -4,7 +4,7 @@ import numpy as np
 (x_train, _), (x_test, _) = mnist.load_data()
 x_train = x_train.astype('float32') / 255.
 
-count = 30000
+count = 300
 ci = 0
 
 #write 0 % error

@@ -4,7 +4,7 @@ import numpy
 #load model here
 sae = StackedAutoEncoder()
 sae.createStackAutoEncoder()
-sae.load("StackedAutoEncoder")
+sae.load("Cross-entropy/StackedAutoEncoder")
 
 
 
